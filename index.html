@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Our Family Memory Game</title>
+    <title>Family Memory Match</title>
     
     <style>
         :root {
@@ -15,19 +15,22 @@
 
         body, html {
             margin: 0; padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Segoe UI', system-ui, sans-serif;
             background-color: var(--bg);
             min-height: 100vh;
             display: flex; flex-direction: column; align-items: center;
         }
 
-        h1 { color: #073b4c; margin-top: 20px; }
-
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(7, 59, 76, 0.98); display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 100; color: white;
-            text-align: center; transition: 0.5s;
+            text-align: center; transition: 0.5s; padding: 20px; box-sizing: border-box;
+        }
+
+        .instruction-card {
+            background: white; color: #333; padding: 25px; border-radius: 20px;
+            max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
         #countdown-text { font-size: 8rem; margin: 0; font-weight: bold; }
@@ -40,7 +43,7 @@
 
         .grid {
             display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: 12px; max-width: 500px; width: 95%; margin-bottom: 40px;
+            gap: 10px; max-width: 500px; width: 95%; margin-bottom: 40px;
         }
 
         .card {
@@ -64,19 +67,30 @@
         .start-btn {
             padding: 15px 40px; border-radius: 50px; border: none;
             background: var(--primary); color: white; font-size: 1.2rem;
-            cursor: pointer; font-weight: bold; transition: 0.3s;
+            cursor: pointer; font-weight: bold; transition: 0.3s; margin-top: 20px;
         }
 
-        .start-btn:hover { transform: scale(1.1); background: #ff5e84; }
+        .start-btn:hover { transform: scale(1.05); background: #ff5e84; }
         .hidden { display: none !important; }
+        
+        ul { text-align: left; margin: 20px 0; padding-left: 20px; }
+        li { margin-bottom: 10px; font-size: 1rem; }
     </style>
 </head>
 <body>
 
     <div id="start-overlay" class="overlay">
-        <h2 style="font-size: 2rem;">Family Memory Match</h2>
-        <p style="margin-bottom: 30px; opacity: 0.9;">Ready to find all the pairs?</p>
-        <button class="start-btn" onclick="startSequence()">Start Game</button>
+        <div class="instruction-card">
+            <h2 style="color: var(--card-back); margin-top: 0;">Family Match Pro</h2>
+            <p>Welcome! Here is how to play:</p>
+            <ul>
+                <li>First, you'll get <strong>3 seconds</strong> to memorize the photo locations.</li>
+                <li>Tap any two cards to flip them over.</li>
+                <li>Find all <strong>8 matching pairs</strong> to win the game.</li>
+                <li>Try to finish in as few moves as possible!</li>
+            </ul>
+            <button class="start-btn" onclick="startSequence()">Start Game</button>
+        </div>
     </div>
 
     <div id="countdown-overlay" class="overlay hidden">
@@ -85,12 +99,12 @@
     </div>
 
     <div id="win-overlay" class="overlay hidden">
-        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">🏆 Well Done!</h2>
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">🏆 Success!</h2>
         <p id="win-message" style="font-size: 1.2rem; margin-bottom: 30px;"></p>
         <button class="start-btn" onclick="location.reload()">Play Again</button>
     </div>
 
-    <h1>Our Memories</h1>
+    <h1 style="color: #073b4c; margin-top: 20px;">Our Memories</h1>
 
     <div class="stats">
         Moves: <span id="moves">0</span> &nbsp; | &nbsp; Matches: <span id="matches">0</span>/8
@@ -99,9 +113,10 @@
     <div class="grid" id="gameGrid"></div>
 
     <script>
+        // UPDATED: Looking in the root folder (no images/ prefix)
         const photoPaths = [
-            'images/1.png', 'images/2.png', 'images/3.png', 'images/4.png',
-            'images/5.png', 'images/6.png', 'images/7.png', 'images/8.png'
+            '1.png', '2.png', '3.png', '4.png',
+            '5.png', '6.png', '7.png', '8.png'
         ];
 
         let flippedCards = [];
@@ -138,6 +153,7 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.dataset.val = path;
+                // Path is now just the filename
                 card.innerHTML = `<div class="card-back">♥</div><div class="card-front"><img src="${path}" alt="Family" onerror="this.parentNode.innerHTML='👤'"></div>`;
                 card.addEventListener('click', flipCard);
                 grid.appendChild(card);
