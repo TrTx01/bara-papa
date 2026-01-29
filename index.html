@@ -27,52 +27,60 @@
         /* --- Animations --- */
         @keyframes pulse-success {
             0% { transform: scale(1) rotateY(180deg); box-shadow: 0 0 0 0 rgba(6, 214, 160, 0.7); }
-            50% { transform: scale(1.05) rotateY(180deg); box-shadow: 0 0 20px 10px rgba(6, 214, 160, 0); }
+            50% { transform: scale(1.15) rotateY(180deg); box-shadow: 0 0 25px 15px rgba(6, 214, 160, 0); }
             100% { transform: scale(1) rotateY(180deg); }
         }
 
         @keyframes shake-error {
             0%, 100% { transform: translateX(0) rotateY(180deg); }
-            20%, 60% { transform: translateX(-5px) rotateY(180deg); }
-            40%, 80% { transform: translateX(5px) rotateY(180deg); }
+            20%, 60% { transform: translateX(-10px) rotateY(180deg); }
+            40%, 80% { transform: translateX(10px) rotateY(180deg); }
         }
 
-        .matched-pulse { animation: pulse-success 0.5s ease-in-out; border: 3px solid var(--success) !important; }
-        .error-shake { animation: shake-error 0.4s ease-in-out; border: 3px solid var(--error) !important; }
+        .matched-pulse { animation: pulse-success 0.5s ease-in-out; border: 4px solid var(--success) !important; z-index: 10; }
+        .error-shake { animation: shake-error 0.4s ease-in-out; border: 4px solid var(--error) !important; z-index: 10; }
 
         /* --- Overlays --- */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(7, 59, 76, 0.98); display: flex; flex-direction: column;
             justify-content: center; align-items: center; z-index: 100; color: white;
-            text-align: center; transition: 0.5s; padding: 20px; box-sizing: border-box;
+            text-align: center; padding: 20px; box-sizing: border-box;
         }
 
         .instruction-card {
             background: white; color: #333; padding: 25px; border-radius: 20px;
-            width: 90%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            width: 90%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
         }
 
-        #countdown-text { font-size: clamp(5rem, 20vw, 10rem); margin: 0; font-weight: bold; }
+        #countdown-text { font-size: 10rem; margin: 0; font-weight: bold; }
 
-        /* --- Game Board --- */
+        /* --- Game Board (3 Columns for Massive Cards) --- */
         .stats {
-            margin: 15px 0; padding: 10px 25px; background: white;
+            margin: 15px 0; padding: 12px 30px; background: white;
             border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            font-size: clamp(0.9rem, 4vw, 1.2rem); font-weight: bold; color: #073b4c;
+            font-size: 1.3rem; font-weight: bold; color: #073b4c;
         }
 
         .grid {
-            display: grid; grid-template-columns: repeat(4, 1fr);
-            gap: clamp(8px, 2vw, 15px); width: 95%; max-width: 800px;
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); /* CHANGED TO 3 COLUMNS */
+            gap: 12px; width: 95%; max-width: 600px;
             margin-bottom: 30px; padding: 10px; box-sizing: border-box;
         }
 
         .card {
             aspect-ratio: 1 / 1; background-color: var(--card-back);
-            border-radius: clamp(6px, 2vw, 12px); cursor: pointer; position: relative;
+            border-radius: 15px; cursor: pointer; position: relative;
             transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 3px solid transparent; box-sizing: border-box;
+            border: 4px solid transparent;
+        }
+
+        /* --- ZOOM FEATURE FOR BAD EYES --- */
+        .card.flipped:active, .card.flipped:hover {
+            transform: scale(1.8) rotateY(180deg); /* Massive zoom on hold/hover */
+            z-index: 50;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .card.flipped { transform: rotateY(180deg); }
@@ -85,50 +93,49 @@
 
         .card-front { background: white; transform: rotateY(180deg); overflow: hidden; }
         .card-front img { width: 100%; height: 100%; object-fit: cover; }
-        .card-back { color: white; font-size: clamp(1.2rem, 5vw, 2.5rem); }
+        .card-back { color: white; font-size: 3rem; font-weight: bold; }
 
         .btn {
-            padding: 12px 24px; border-radius: 50px; border: none;
-            color: white; font-size: clamp(0.9rem, 4vw, 1.1rem);
-            cursor: pointer; font-weight: bold; transition: 0.3s; margin: 8px;
-            display: inline-block; text-decoration: none; min-width: 160px;
+            padding: 15px 35px; border-radius: 50px; border: none;
+            color: white; font-size: 1.2rem;
+            cursor: pointer; font-weight: bold; transition: 0.3s; margin: 10px;
+            display: inline-block; text-decoration: none;
         }
 
         .start-btn { background: var(--primary); }
         .whatsapp-btn { background: var(--whatsapp); }
         .hidden { display: none !important; }
         
-        h1 { font-size: clamp(1.5rem, 6vw, 2.5rem); color: #073b4c; margin: 15px 0 5px 0; }
+        h1 { font-size: 2.2rem; color: #073b4c; margin: 15px 0; }
     </style>
 </head>
 <body>
 
     <div id="start-overlay" class="overlay">
         <div class="instruction-card">
-            <h2 style="color: var(--card-back); margin-top: 0;">Family Match Pro</h2>
-            <p>Memorize the photos, find the pairs!</p>
+            <h2 style="color: var(--card-back);">Family Match Pro</h2>
+            <p><strong>Note for Seniors:</strong> Once a card is flipped, tap and hold it to see a much larger view of the photo!</p>
             <button class="btn start-btn" onclick="startSequence()">Start Game</button>
         </div>
     </div>
 
-    <div id="countdown-overlay" class="overlay hidden" style="background: rgba(7, 59, 76, 0.6); pointer-events: none;">
+    <div id="countdown-overlay" class="overlay hidden" style="background: rgba(7, 59, 76, 0.5); pointer-events: none;">
         <h1 id="countdown-text">3</h1>
     </div>
 
     <div id="win-overlay" class="overlay hidden">
         <h2>🏆 Well Done!</h2>
-        <p id="win-message" style="margin-bottom: 30px;"></p>
-        <div style="display: flex; flex-direction: column; align-items: center;">
-            <a id="whatsapp-link" href="#" class="btn whatsapp-btn">Share Result</a>
-            <button class="btn start-btn" onclick="location.reload()">Play Again</button>
-        </div>
+        <p id="win-message" style="font-size: 1.4rem;"></p>
+        <a id="whatsapp-link" href="#" class="btn whatsapp-btn">Share Result</a>
+        <button class="btn start-btn" onclick="location.reload()">Play Again</button>
     </div>
 
     <h1>Our Memories</h1>
-    <div class="stats">Moves: <span id="moves">0</span> &nbsp; | &nbsp; Matches: <span id="matches">0</span>/8</div>
+    <div class="stats">Matches: <span id="matches">0</span>/8</div>
     <div class="grid" id="gameGrid"></div>
 
     <script>
+        // Use 8 images (but the grid will be 3x6 or 3x5+1, adjusted below)
         const photoPaths = ['1.png', '2.png', '3.png', '4.png', '5.png', '6.png', '7.png', '8.png'];
         let flippedCards = [];
         let matchedCount = 0;
@@ -145,7 +152,7 @@
                 const card = document.createElement('div');
                 card.className = 'card';
                 card.dataset.val = path;
-                card.innerHTML = `<div class="card-back">♥</div><div class="card-front"><img src="${path}" alt="Family"></div>`;
+                card.innerHTML = `<div class="card-back">?</div><div class="card-front"><img src="${path}" alt="Family"></div>`;
                 card.addEventListener('click', flipCard);
                 grid.appendChild(card);
             });
@@ -175,7 +182,6 @@
             flippedCards.push(this);
             if (flippedCards.length === 2) {
                 moves++;
-                document.getElementById('moves').textContent = moves;
                 checkMatch();
             }
         }
@@ -207,9 +213,9 @@
             const winOverlay = document.getElementById('win-overlay');
             const winMsg = document.getElementById('win-message');
             const waLink = document.getElementById('whatsapp-link');
-            const text = `I found everyone in ${moves} moves! Beat my score: ${window.location.href}`;
+            const text = `I finished the Family Match in ${moves} moves! Beat my score: ${window.location.href}`;
             waLink.href = `https://wa.me/?text=${encodeURIComponent(text)}`;
-            winMsg.innerHTML = `You found everyone in <strong>${moves}</strong> moves!`;
+            winMsg.innerHTML = `You found all 8 pairs in <strong>${moves}</strong> moves!`;
             setTimeout(() => winOverlay.classList.remove('hidden'), 600);
         }
     </script>
