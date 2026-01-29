@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Family Memory Game</title>
+    
+    <style>
+        :root {
+            --primary: #ef476f;
+            --success: #06d6a0;
+            --bg: #f8f9fa;
+            --card-back: #073b4c;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            min-height: 100vh;
+            display: flex; flex-direction: column; align-items: center;
+        }
+
+        h1 { color: #073b4c; margin-top: 20px; }
+
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(7, 59, 76, 0.98); display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 100; color: white;
+            text-align: center; transition: 0.5s;
+        }
+
+        #countdown-text { font-size: 8rem; margin: 0; font-weight: bold; }
+
+        .stats {
+            margin: 20px 0; padding: 15px 30px; background: white;
+            border-radius: 50px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            font-size: 1.1rem; font-weight: bold; color: #073b4c;
+        }
+
+        .grid {
+            display: grid; grid-template-columns: repeat(4, 1fr);
+            gap: 12px; max-width: 500px; width: 95%; margin-bottom: 40px;
+        }
+
+        .card {
+            aspect-ratio: 1 / 1; background-color: var(--card-back);
+            border-radius: 12px; cursor: pointer; position: relative;
+            transform-style: preserve-3d; transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .card.flipped { transform: rotateY(180deg); }
+
+        .card-front, .card-back {
+            position: absolute; width: 100%; height: 100%;
+            backface-visibility: hidden; border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        .card-front { background: white; transform: rotateY(180deg); overflow: hidden; }
+        .card-front img { width: 100%; height: 100%; object-fit: cover; }
+        .card-back { color: white; font-size: 2rem; }
+
+        .start-btn {
+            padding: 15px 40px; border-radius: 50px; border: none;
+            background: var(--primary); color: white; font-size: 1.2rem;
+            cursor: pointer; font-weight: bold; transition: 0.3s;
+        }
+
+        .start-btn:hover { transform: scale(1.1); background: #ff5e84; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="start-overlay" class="overlay">
+        <h2 style="font-size: 2rem;">Family Memory Match</h2>
+        <p style="margin-bottom: 30px; opacity: 0.9;">Ready to find all the pairs?</p>
+        <button class="start-btn" onclick="startSequence()">Start Game</button>
+    </div>
+
+    <div id="countdown-overlay" class="overlay hidden">
+        <h1 id="countdown-text">3</h1>
+        <p style="letter-spacing: 2px;">MEMORIZE THE PHOTOS!</p>
+    </div>
+
+    <div id="win-overlay" class="overlay hidden">
+        <h2 style="font-size: 2.5rem; margin-bottom: 10px;">🏆 Well Done!</h2>
+        <p id="win-message" style="font-size: 1.2rem; margin-bottom: 30px;"></p>
+        <button class="start-btn" onclick="location.reload()">Play Again</button>
+    </div>
+
+    <h1>Our Memories</h1>
+
+    <div class="stats">
+        Moves: <span id="moves">0</span> &nbsp; | &nbsp; Matches: <span id="matches">0</span>/8
+    </div>
+
+    <div class="grid" id="gameGrid"></div>
+
+    <script>
+        const photoPaths = [
+            'images/1.png', 'images/2.png', 'images/3.png', 'images/4.png',
+            'images/5.png', 'images/6.png', 'images/7.png', 'images/8.png'
+        ];
+
+        let flippedCards = [];
+        let matchedCount = 0;
+        let moves = 0;
+        let isLocked = true;
+
+        function startSequence() {
+            document.getElementById('start-overlay').classList.add('hidden');
+            document.getElementById('countdown-overlay').classList.remove('hidden');
+            createBoard();
+            document.querySelectorAll('.card').forEach(c => c.classList.add('flipped'));
+
+            let count = 3;
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    document.getElementById('countdown-text').textContent = count;
+                } else {
+                    clearInterval(timer);
+                    document.getElementById('countdown-overlay').classList.add('hidden');
+                    document.querySelectorAll('.card').forEach(c => c.classList.remove('flipped'));
+                    isLocked = false;
+                }
+            }, 1000);
+        }
+
+        function createBoard() {
+            const grid = document.getElementById('gameGrid');
+            grid.innerHTML = '';
+            const gameCards = [...photoPaths, ...photoPaths].sort(() => Math.random() - 0.5);
+
+            gameCards.forEach(path => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.val = path;
+                card.innerHTML = `<div class="card-back">♥</div><div class="card-front"><img src="${path}" alt="Family" onerror="this.parentNode.innerHTML='👤'"></div>`;
+                card.addEventListener('click', flipCard);
+                grid.appendChild(card);
+            });
+        }
+
+        function flipCard() {
+            if (isLocked || this.classList.contains('flipped')) return;
+            this.classList.add('flipped');
+            flippedCards.push(this);
+            if (flippedCards.length === 2) {
+                moves++;
+                document.getElementById('moves').textContent = moves;
+                checkMatch();
+            }
+        }
+
+        function checkMatch() {
+            isLocked = true;
+            const [c1, c2] = flippedCards;
+            if (c1.dataset.val === c2.dataset.val) {
+                matchedCount++;
+                document.getElementById('matches').textContent = matchedCount;
+                flippedCards = [];
+                isLocked = false;
+                if (matchedCount === 8) {
+                    const winOverlay = document.getElementById('win-overlay');
+                    const winMsg = document.getElementById('win-message');
+                    winMsg.innerHTML = `You found everyone in <strong>${moves}</strong> moves!`;
+                    setTimeout(() => winOverlay.classList.remove('hidden'), 600);
+                }
+            } else {
+                setTimeout(() => {
+                    c1.classList.remove('flipped');
+                    c2.classList.remove('flipped');
+                    flippedCards = [];
+                    isLocked = false;
+                }, 1000);
+            }
+        }
+    </script>
+</body>
+</html>
